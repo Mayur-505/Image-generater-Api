@@ -70,7 +70,6 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
 
             // const output = await rembg.remove(input);
             // let imageRm = await output.webp().toBuffer()
-            console.log("🚀 ~ file: imageProcess.ts:73 ~ imageMeasurements.map ~ imageRm:", imageRm)
             compositeArray.push({
                 input: element?.buffer,
                 gravity: 'north',
