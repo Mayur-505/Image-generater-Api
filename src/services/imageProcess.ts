@@ -64,11 +64,13 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
             //     .toBuffer();
             let input = sharp(element?.buffer)
 
-            // const rembg = new Rembg({
-            //     logging: true,
-            // });
+            const rembg = new Rembg({
+                logging: true,
+            });
+            console.log("🚀 ~ file: imageProcess.ts:66 ~ imageMeasurements.map ~ input:", input)
 
-            // const output = await rembg.remove(input);
+            const output = await rembg.remove(input);
+            console.log("🚀 ~ file: imageProcess.ts:72 ~ imageMeasurements.map ~ output:", output)
             // let imageRm = await output.webp().toBuffer()
             compositeArray.push({
                 input: element?.buffer,
