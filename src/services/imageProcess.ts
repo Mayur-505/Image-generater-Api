@@ -69,14 +69,13 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
             });
 
             const output = await rembg.remove(input);
+            let imageRm = await output.webp().toBuffer()
+            console.log("🚀 ~ file: imageProcess.ts:73 ~ imageMeasurements.map ~ imageRm:", imageRm)
             compositeArray.push({
-                input: await output.webp().toBuffer(),
+                input: imageRm,
                 gravity: 'north',
-                // top: i > 0 ? imageMeasurements?.reduce((total, item, index) => index < i ? total + item?.height : total, 0) : 20,
                 top: i * imageHeight + 50,
-                // left: imageWidth / 3 > imageMeasurements[i]?.width ? imageWidth / 3 : 25
                 left: 100
-                // left: imageWidth / 3 > imageMeasurements[i]?.width ? imageWidth / 3 : 25
             });
             console.log("🚀 ~ file: imageProcess.ts:81 ~ imageMeasurements.map ~ compositeArray:", compositeArray)
         })
