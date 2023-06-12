@@ -485,6 +485,7 @@ export class Repository {
             let isOwner = false;
             let result: imageGenerateResult;
             modifyCategoryData(files, category)
+            console.log("🚀 ~ file: index.repository.ts:488 ~ Repository ~ imageGenerate= ~ category:", category)
             const { error, value } = userValidation.imageGenerate.validate({ category });
 
             if (error) {
@@ -513,6 +514,7 @@ export class Repository {
 
             return result;
         } catch (err) {
+            console.log("🚀 ~ file: index.repository.ts:517 ~ Repository ~ imageGenerate= ~ err:", err)
             throw err;
         }
     }

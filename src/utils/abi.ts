@@ -593,6 +593,7 @@ export const modifyCategoryData = (fileData, category) => {
 
 
 export const imageProbability = async (category) => {
+  console.log("🚀 ~ file: abi.ts:596 ~ imageProbability ~ category:", category)
   return await category.map((items) => {
     console.log("🚀 ~ file: abi.ts:597 ~ returnawaitcategory.map ~ items:", typeof items?.userProbability)
     if (items?.userProbability) {
