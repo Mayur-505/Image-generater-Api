@@ -78,6 +78,7 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
                 left: 100
                 // left: imageWidth / 3 > imageMeasurements[i]?.width ? imageWidth / 3 : 25
             });
+            console.log("🚀 ~ file: imageProcess.ts:81 ~ imageMeasurements.map ~ compositeArray:", compositeArray)
         })
     );
 
