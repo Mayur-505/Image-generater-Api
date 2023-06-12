@@ -5,6 +5,8 @@ import router from "./routes";
 import { ValidationError } from "express-validation";
 
 const app: Application = express();
+app.set('view engine', 'ejs');
+
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json({ limit: "50mb", type: "application/json" }));

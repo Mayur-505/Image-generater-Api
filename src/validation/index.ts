@@ -9,7 +9,6 @@ export const userValidation = {
                     categoryName: Joi.string().required(),
                     order: Joi.number().required(),
                     rarity: Joi.number().required(),
-                    userProbability: Joi.boolean().required(),
                     file: Joi.array().items(
                         Joi.object()
                             .keys({

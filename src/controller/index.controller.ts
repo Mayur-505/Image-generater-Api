@@ -51,6 +51,7 @@ export class Controller {
             const results = await Repository.imageGenerate(req.body, req?.files);
             return SendSuccessResponse(res, "Ipfs image url created Successfully!", results, 200);
         } catch (err) {
+            console.log(err);
             return SendErrorResponse(res, "Something went wrong!", err, 500);
         }
     }

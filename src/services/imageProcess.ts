@@ -51,11 +51,11 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
             }
         })
     );
+    console.log("🚀 ~ file: imageProcess.ts:54 ~ combineImages ~ imageMeasurements:", imageMeasurements)
     // let imageWidth: number = Math.ceil(Math.max(...imageMeasurements.map(image => image?.width))) + 300
     // let imageHeight: number = Math.ceil(Math.max(...imageMeasurements.map(image => image?.height)))
 
     let compositeArray: sharp.OverlayOptions[] = [];
-    console.log("🚀 ~ file: imageProcess.ts:58 ~ combineImages ~ compositeArray:", compositeArray)
 
     await Promise.all(
         imageMeasurements.map(async (element, i) => {
@@ -81,6 +81,7 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
         })
     );
 
+    console.log("🚀 ~ file: imageProcess.ts:59 ~ combineImages ~ compositeArray:", compositeArray)
 
     const compositeBuffer = await sharp({
         create: {
@@ -94,12 +95,12 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
         .composite(compositeArray)
         .jpeg()
         .toBuffer();
-    console.log("🚀 ~ file: imageProcess.ts:94 ~ combineImages ~ compositeBuffer:", compositeBuffer)
+    console.log("🚀 ~ file: imageProcess.ts:109 ~ combineImages ~ compositeArray:", compositeArray)
 
     return await new Promise<string>((resolve, reject) => {
         fs.writeFile("output.jpeg", compositeBuffer, (error) => {
             if (error) {
-                console.log("🚀 ~ file: imageProcess.ts:102 ~ fs.writeFile ~ error:", error)
+                console.log("🚀 ~ file: imageProcess.ts:103 ~ fs.writeFile ~ error:", error)
                 reject(error);
             } else {
                 resolve("output.webp");

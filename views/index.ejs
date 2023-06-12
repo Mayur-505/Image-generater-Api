@@ -1,0 +1,180 @@
+<!-- form.ejs -->
+<html>
+  <head>
+    <title>Input Form</title>
+    <style>
+        .loader {
+          display: none;
+          border: 8px solid #f3f3f3; /* Light grey */
+        border-top: 8px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        animation: spin 2s linear infinite;
+          /* Your loader styles here */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+            }
+            #submit-form{
+                display: block;
+            }
+
+            .main-div{
+                height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+            }
+      </style>
+  </head>
+  <body>
+    <h1>Input Form</h1>
+    <form id="submit-form" action="/ipfs/imageGenerate" method="POST" enctype="multipart/form-data">
+      <h2>Categories</h2>
+      <div id="categories-container">
+        <!-- Dynamic category fields will be added here -->
+      </div>
+      <br>
+      <button type="button" onclick="addCategory()">+ Add Category</button>
+      <br>
+      <button type="submit">Submit</button>
+    </form>
+    <!-- <div class="main-div"> -->
+        <div id="loader" class="loader">
+            <!-- Your loader HTML here -->
+          </div>
+
+    <!-- </div> -->
+    <script>
+      let categoryId = 0;
+      let file =0;
+      function addCategory() {
+        const categoriesContainer = document.getElementById('categories-container');
+
+        const categoryField = document.createElement('div');
+        categoryField.innerHTML = `
+          <h3>Category ${categoryId + 1}</h3>
+          <label for="name-${categoryId}">Category Name:</label>
+          <input type="text" id="name-${categoryId}" name="category[${categoryId}][categoryName]" required>
+          <br>
+          <label for="name-${categoryId}">Order:</label>
+          <input type="number" id="name-${categoryId}" name="category[${categoryId}][order]" required>
+          <br>
+      
+          <div id="files-container-${categoryId}">
+            
+            <!-- Dynamic file fields will be added here -->
+          </div>
+          <br>
+            <button type="button" onclick="addFile(${categoryId})">+ Add File</button>
+          <br>
+          <label for="name-${categoryId}">Name:</label>
+          <input type="text" id="name-${categoryId}" name="category[${categoryId}][name]" required>
+          <br>
+          <label for="name-${categoryId}">Rarity:</label>
+          <input type="number" id="name-${categoryId}" name="category[${categoryId}][rarity]" required>
+          <br>
+          <div id="attribute-container-${categoryId}">
+            
+            <!-- Dynamic file fields will be added here -->
+          </div>
+          <br>
+            <button type="button" onclick="addAttribute(${categoryId})">+ Add attribute</button>
+          <br>
+        `;
+
+        categoriesContainer.appendChild(categoryField);
+        categoryId++;
+      }
+      function addFile(categoryId) {
+        const filesContainer = document.getElementById(`files-container-${categoryId}`);
+
+        const fileField = document.createElement('div');
+        fileField.innerHTML = `
+        <br>
+          <label for="file-${categoryId}-${filesContainer.childElementCount}">File:</label>
+          <input type="file" id="file-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" accept="image/*" required>
+          <br>
+            <label for="image-${categoryId}-${filesContainer.childElementCount}">Probabilty:</label>
+          <input type="number" id="image-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][probability][${filesContainer.childElementCount}]" >
+          <br>
+        `;
+
+        filesContainer.appendChild(fileField);
+      }
+      function addAttribute(categoryId) {
+        const filesContainer = document.getElementById(`attribute-container-${categoryId}`);
+
+        const fileField = document.createElement('div');
+        fileField.innerHTML = `
+        <br>
+        <label for="name-${categoryId}">Label:</label>
+        
+          <input type="text" id="label-${categoryId}-${filesContainer.childElementCount}" onchange="updateInput2(${categoryId},${filesContainer.childElementCount})"  required >
+          <label for="name-${categoryId}">Value:</label>
+
+          <input type="text" id="value-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][${document.getElementById(`label-${categoryId}`)}]" required>
+        `;
+
+        filesContainer.appendChild(fileField);
+      }
+    // function addAttribute(categoryId) {
+    //     const attributesContainer = document.getElementById(`attributes-container-${categoryId}`);
+
+    //     const attributeField = document.createElement('div');
+    //     attributeField.innerHTML = `
+    //       <label for="label-${categoryId}">Label:</label>
+    //       <input type="text" id="label-${categoryId}" name="categories[${categoryId}][attributes][label]" required>
+    //       <br>
+    //       <label for="input-${categoryId}">Input:</label>
+    //       <input type="text" id="input-${categoryId}" name="categories[${categoryId}][attributes][input]" required>
+    //       <br>
+    //     `;
+
+    //     attributesContainer.appendChild(attributeField);
+    //   }
+
+
+      function submitForm() {
+        const form = document.getElementById('submit-form');
+        const loader = document.getElementById('loader');
+
+        loader.style.display = 'block';
+        form.classList.add('pending');
+        form.submit();
+      }
+
+      function updateInput2(id,innerId) {
+        const input1Value = document.getElementById(`label-${id}-${innerId}`).value;
+        console.log("🚀 ~ file: index.ejs:155 ~ updateInput2 ~ input1Value:", input1Value)
+        document.getElementById(`value-${id}-${innerId}`).name = `category[${id}][${input1Value}]`;
+      }
+
+      window.addEventListener('load', () => {
+        const form = document.getElementById('submit-form');
+        const loader = document.getElementById('loader');
+
+        form.addEventListener('submit', () => {
+          loader.style.display = 'block';
+        //   form.style.display="none";
+          form.classList.add('pending');
+        });
+
+        form.addEventListener('animationend', () => {
+          if (form.classList.contains('pending')) {
+            loader.style.display = 'none';
+        //   form.style.display="block";
+
+            form.classList.remove('pending');
+          }
+        });
+      });
+
+    </script>
+  </body>
+</html>

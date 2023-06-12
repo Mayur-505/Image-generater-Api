@@ -6,6 +6,11 @@ const router = express.Router();
 const multer = require('multer');
 const upload = multer();
 
+
+router.get("/", (req, res) => {
+    res.send("hello world")
+});
+
 // Route for minting a single nft
 router.post("/mint/single-nft", Controller.mintSingleNFT);
 
@@ -21,5 +26,9 @@ router.post("/ownerOfNFT", Controller.ownerOfNFT);
 // Route for ipfs image url generatiom
 router.post("/ipfs/imageGenerate", upload.any(), Controller.imageGenerate);
 // router.post("/ipfs/imageGenerate", upload.any(), validate(userValidation.imageGenerate), Controller.imageGenerate);
+
+router.get('/image-generate', (req, res) => {
+    res.render('index');
+});
 
 export default router;
