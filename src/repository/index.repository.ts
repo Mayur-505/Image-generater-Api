@@ -513,6 +513,7 @@ export class Repository {
 
             return result;
         } catch (err) {
+            console.log("🚀 ~ file: index.repository.ts:516 ~ Repository ~ imageGenerate= ~ err:", err)
             throw err;
         }
     }

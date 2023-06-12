@@ -35,6 +35,7 @@ export const uploadToPinata = (data) => {
 
 
 export const combineImages = async (images: Buffer[]): Promise<string> => {
+    console.log("🚀 ~ file: imageProcess.ts:38 ~ combineImages ~ images:", images)
     let imageWidth: number = 800;
     let imageHeight: number = 600;
     let imageMeasurements = await Promise.all(
@@ -54,6 +55,7 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
     // let imageHeight: number = Math.ceil(Math.max(...imageMeasurements.map(image => image?.height)))
 
     let compositeArray: sharp.OverlayOptions[] = [];
+    console.log("🚀 ~ file: imageProcess.ts:58 ~ combineImages ~ compositeArray:", compositeArray)
 
     await Promise.all(
         imageMeasurements.map(async (element, i) => {
@@ -92,10 +94,12 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
         .composite(compositeArray)
         .jpeg()
         .toBuffer();
+    console.log("🚀 ~ file: imageProcess.ts:94 ~ combineImages ~ compositeBuffer:", compositeBuffer)
 
     return await new Promise<string>((resolve, reject) => {
         fs.writeFile("output.jpeg", compositeBuffer, (error) => {
             if (error) {
+                console.log("🚀 ~ file: imageProcess.ts:102 ~ fs.writeFile ~ error:", error)
                 reject(error);
             } else {
                 resolve("output.webp");
