@@ -32,7 +32,7 @@
             }
       </style>
   </head>
-  <body>
+  <body style="background-color: #f6e3cd;">
     <h1>Input Form</h1>
     <form id="submit-form" action="/ipfs/imageGenerate" method="POST" enctype="multipart/form-data">
       <h2>Categories</h2>
@@ -59,6 +59,9 @@
         const categoryField = document.createElement('div');
         categoryField.innerHTML = `
           <h3>Category ${categoryId + 1}</h3>
+          <label for="name-${categoryId}">Number of image to generate </label>
+          <input type="text" id="name-${categoryId}" onChange="${onChangeNumOfImage(categoryId)}" required>
+          <br>
           <label for="name-${categoryId}">Category Name:</label>
           <input type="text" id="name-${categoryId}" name="category[${categoryId}][categoryName]" required>
           <br>
@@ -66,26 +69,21 @@
           <input type="number" id="name-${categoryId}" name="category[${categoryId}][order]" required>
           <br>
       
-          <div id="files-container-${categoryId}">
+          <div id="files-container-${categoryId}" >
+            <br>
+          <label for="file-${categoryId}">File:</label>
+          <input type="file" multiple id="file-${categoryId}" accept="image/*" onchange="onChangeFile(${categoryId})" required>
+          
+            <!-- Dynamic file fields will be added here -->
+          </div>
+          <div id="Images-container-${categoryId}" style="display:flex">
             
             <!-- Dynamic file fields will be added here -->
           </div>
           <br>
-            <button type="button" onclick="addFile(${categoryId})">+ Add File</button>
-          <br>
-          <label for="name-${categoryId}">Name:</label>
-          <input type="text" id="name-${categoryId}" name="category[${categoryId}][name]" required>
-          <br>
-          <label for="name-${categoryId}">Rarity:</label>
-          <input type="number" id="name-${categoryId}" name="category[${categoryId}][rarity]" required>
-          <br>
-          <div id="attribute-container-${categoryId}">
-            
-            <!-- Dynamic file fields will be added here -->
-          </div>
-          <br>
-            <button type="button" onclick="addAttribute(${categoryId})">+ Add attribute</button>
-          <br>
+            <!--<button type="button" onclick="addFile(${categoryId})">+ Add File</button> -->
+         
+        
         `;
 
         categoriesContainer.appendChild(categoryField);
@@ -98,7 +96,7 @@
         fileField.innerHTML = `
         <br>
           <label for="file-${categoryId}-${filesContainer.childElementCount}">File:</label>
-          <input type="file" id="file-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" accept="image/*" required>
+          <input type="file" multiple id="file-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" accept="image/*" onchange="onChangeFile(${categoryId},${filesContainer.childElementCount})" required>
           <br>
             <label for="image-${categoryId}-${filesContainer.childElementCount}">Probabilty:</label>
           <input type="number" id="image-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][probability][${filesContainer.childElementCount}]" >
@@ -107,38 +105,122 @@
 
         filesContainer.appendChild(fileField);
       }
-      function addAttribute(categoryId) {
-        const filesContainer = document.getElementById(`attribute-container-${categoryId}`);
+      function addAttribute(categoryId,imageId) {
+        const filesContainer = document.getElementById(`attribute-container-${categoryId}-${imageId}`);
 
         const fileField = document.createElement('div');
         fileField.innerHTML = `
         <br>
         <label for="name-${categoryId}">Label:</label>
         
-          <input type="text" id="label-${categoryId}-${filesContainer.childElementCount}" onchange="updateInput2(${categoryId},${filesContainer.childElementCount})"  required >
+          <input type="text" id="label-${categoryId}-${filesContainer.childElementCount}" onchange="updateInput2(${categoryId},${filesContainer.childElementCount},${imageId})"  required >
           <label for="name-${categoryId}">Value:</label>
 
-          <input type="text" id="value-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][${document.getElementById(`label-${categoryId}`)}]" required>
+          <input type="text" id="value-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][${document.getElementById(`label-${categoryId}`)}][${imageId}]" required>
         `;
 
         filesContainer.appendChild(fileField);
+        // const filesContainer = document.getElementById(`attribute-container-${categoryId}`);
+
+        // const fileField = document.createElement('div');
+        // fileField.innerHTML = `
+        // <br>
+        // <label for="name-${categoryId}">Label:</label>
+        
+        //   <input type="text" id="label-${categoryId}-${filesContainer.childElementCount}" onchange="updateInput2(${categoryId},${filesContainer.childElementCount})"  required >
+        //   <label for="name-${categoryId}">Value:</label>
+
+        //   <input type="text" id="value-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][${document.getElementById(`label-${categoryId}`)}]" required>
+        // `;
+
+        // filesContainer.appendChild(fileField);
       }
-    // function addAttribute(categoryId) {
-    //     const attributesContainer = document.getElementById(`attributes-container-${categoryId}`);
+      
+      function onChangeNumOfImage(categoryId){
+        
+      }
+      function onChangeFile(categoryId,fileId){
+        let files = document.getElementById(`file-${categoryId}`).files
+        const container = document.getElementById(`files-container-${categoryId}`);
+        container.style.display = "none"
+        let i =0
 
-    //     const attributeField = document.createElement('div');
-    //     attributeField.innerHTML = `
-    //       <label for="label-${categoryId}">Label:</label>
-    //       <input type="text" id="label-${categoryId}" name="categories[${categoryId}][attributes][label]" required>
-    //       <br>
-    //       <label for="input-${categoryId}">Input:</label>
-    //       <input type="text" id="input-${categoryId}" name="categories[${categoryId}][attributes][input]" required>
-    //       <br>
-    //     `;
+        while(i<files.length){
+          
+          const reader = new FileReader();
+          
+          reader.onload = (e) => {
+            // imgTag.src = e.target.result;
+            const filesContainer = document.getElementById(`Images-container-${categoryId}`);
+            const fileField = document.createElement('div');
+            fileField.innerHTML = `
+            <img src="${e.target.result}" alt="Smiley face" width="60" height="60" style="vertical-align:middle;margin:0px 50px" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" onclick="onClickImage(${categoryId},${filesContainer.childElementCount},${files.length})">
+            <br>
+                <label for="image-${categoryId}-${filesContainer.childElementCount}">Probabilty:</label>
+                <input type="text" id="probability-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][probability][${filesContainer.childElementCount}]" value="${(100/files.length).toFixed(2)}%" onchange="onChangeProbability(${categoryId},${filesContainer.childElementCount})" >
+                <div id="category[${categoryId}][attribute][${filesContainer.childElementCount}]" style="display:${filesContainer.childElementCount == 0 ? 'block':'none'}"> 
+               <br>
+                <label for="name-${categoryId}">Name:</label>
+                <input type="text" id="category[${categoryId}][name][${filesContainer.childElementCount}]" name="category[${categoryId}][name][${filesContainer.childElementCount}]" required>
+                <br>
+                <label for="category[${categoryId}][rarity][${filesContainer.childElementCount}]">Rarity:</label>
+                <input type="text" id="category[${categoryId}][rarity][${filesContainer.childElementCount}]" name="category[${categoryId}][rarity][${filesContainer.childElementCount}]" value="${(100/files.length).toFixed(2)}%"  default=${true} required>
+                <br>
+                <br>
+                <div id="attribute-container-${categoryId}-${filesContainer.childElementCount}">
+             
+             <!-- Dynamic file fields will be added here -->
+           </div>
+ 
+             <button type="button" onclick="addAttribute(${categoryId},${filesContainer.childElementCount})">+ Add attribute</button>
+           <br>
+               </div>
+            `;
+            // fileField.innerHTML = `
+            // `;
+        
+            filesContainer.appendChild(fileField)
+          };
+          
+          reader.readAsDataURL(files[i]); 
 
-    //     attributesContainer.appendChild(attributeField);
-    //   }
 
+          i++
+
+        }
+
+      }
+function onClickImage(categoryId,imageId,length){
+  let i=0;
+  while(i<length){
+    if(i === imageId){
+      let imageContainer = document.getElementById(`category[${categoryId}][attribute][${imageId}]`)
+      imageContainer.style.display = "block"
+      
+    }else{
+      let imageContainer = document.getElementById(`category[${categoryId}][attribute][${i}]`)
+      imageContainer.style.display = "none"
+
+    }
+    i++
+  }
+}
+      function onChangeProbability(categoryId,imageId){
+        const imageContainer = document.getElementById(`Images-container-${categoryId}`);
+
+        const currentProbability = parseFloat(document.getElementById(`probability-${categoryId}-${imageId}`).value.replace("%",""))
+        document.getElementById(`category[${categoryId}][rarity][${imageId}]`).value = `${currentProbability}%`
+        
+        let i =0;
+        while(i<imageContainer.childElementCount){
+          if(i !== imageId){
+            document.getElementById(`probability-${categoryId}-${i}`).value = `${(100-currentProbability)/ (imageContainer.childElementCount-1)}%`
+            document.getElementById(`category[${categoryId}][rarity][${i}]`).value = `${(100-currentProbability)/ (imageContainer.childElementCount-1)}%`
+          }
+          i++
+        }
+
+      }
 
       function submitForm() {
         const form = document.getElementById('submit-form');
@@ -149,10 +231,9 @@
         form.submit();
       }
 
-      function updateInput2(id,innerId) {
+      function updateInput2(id,innerId,imageId) {
         const input1Value = document.getElementById(`label-${id}-${innerId}`).value;
-        console.log("🚀 ~ file: index.ejs:155 ~ updateInput2 ~ input1Value:", input1Value)
-        document.getElementById(`value-${id}-${innerId}`).name = `category[${id}][${input1Value}]`;
+        document.getElementById(`value-${id}-${innerId}`).name = `category[${id}][${input1Value}][${imageId}]`;
       }
 
       window.addEventListener('load', () => {

@@ -51,7 +51,6 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
             }
         })
     );
-    console.log("🚀 ~ file: imageProcess.ts:54 ~ combineImages ~ imageMeasurements:", imageMeasurements)
     // let imageWidth: number = Math.ceil(Math.max(...imageMeasurements.map(image => image?.width))) + 300
     // let imageHeight: number = Math.ceil(Math.max(...imageMeasurements.map(image => image?.height)))
 
@@ -63,14 +62,17 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
             //     .resize(imageWidth, imageHeight)
             //     .toBuffer();
             let input = sharp(element?.buffer)
+            const image = await sharp(element?.buffer)
+                .flatten({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
+                .toFile("outputImagePath.png");
 
-            const rembg = new Rembg({
-                logging: true,
-            });
-            console.log("🚀 ~ file: imageProcess.ts:66 ~ imageMeasurements.map ~ input:", input)
+            console.log('Background removed successfully.');
 
-            const output = await rembg.remove(input);
-            console.log("🚀 ~ file: imageProcess.ts:72 ~ imageMeasurements.map ~ output:", output)
+            // const rembg = new Rembg({
+            //     logging: true,
+            // });
+
+            // const output = await rembg.remove(input);
             // let imageRm = await output.webp().toBuffer()
             compositeArray.push({
                 input: element?.buffer,

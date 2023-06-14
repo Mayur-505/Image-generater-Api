@@ -4,10 +4,38 @@ import { validate } from "express-validation";
 import { userValidation } from "../validation";
 const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+var ImageKit = require("imagekit");
 const upload = multer();
 
 
 router.get("/", (req, res) => {
+
+    var imagekit = new ImageKit({
+        publicKey: "public_dULmhg3SBiDBUzhjUeZXaBlkwDU=",
+        privateKey: "private_2UE+5TwmrJ1O3u3rPakEJdoPRes=",
+        urlEndpoint: "https://ik.imagekit.io/bgremove/"
+    });
+
+
+    fs.readFile('images.jpeg', function (err, data) {
+        if (err) throw err; // Fail if the file can't be read.
+        imagekit.upload({
+            file: data, //required
+            fileName: "my_file_name.jpeg", //required
+            tags: ["tag1", "tag2"],
+            // extensions: [
+            //     {
+            //         "name": "remove-bg",
+
+            //     },
+
+            // ]
+        }, function (error, result) {
+            if (error) console.log(error);
+            else console.log(result);
+        });
+    })
     res.send("hello world")
 });
 
