@@ -49,7 +49,11 @@ export class Controller {
     public static imageGenerate = async (req: Request, res: Response) => {
         try {
             const results = await Repository.imageGenerate(req.body, req?.files);
-            return SendSuccessResponse(res, "Ipfs image url created Successfully!", results, 200);
+            // let results = [{
+            //     image_url: "https://gateway.pinata.cloud/ipfs/QmZt4PZyCaqyLfcKhziQGsm6nYJUcFY4kh8C3yrj9c5F9t"
+            // }]
+            res.render("images", { results })
+            // return SendSuccessResponse(res, "Ipfs image url created Successfully!", results, 200);
         } catch (err) {
             console.log(err);
             return SendErrorResponse(res, "Something went wrong!", err, 500);

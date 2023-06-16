@@ -36,6 +36,16 @@
     <h1>Input Form</h1>
     <form id="submit-form" action="/ipfs/imageGenerate" method="POST" enctype="multipart/form-data">
       <h2>Categories</h2>
+      <label for="name-${categoryId}">Number of image to generate </label>
+          <input type="text" id="name-${categoryId}" onChange="onChangeNumOfImage(categoryId)" name="noOfImage" required>
+          <br>
+          <label for="name-${categoryId}">Name of blockchain</label>
+
+          <button onclick="onClick('Binance')"  type="button"  id="blockchain" >Binance</button>
+          <button onclick="onClick('Ethereum')" type="button"  id="blockchain">Ethereum</button>
+          <button onclick="onClick('Klaytn')"  type="button" id="blockchain">Klaytn</button>
+          <input style="display: block;" name="blockchain" id="blchain"/>
+          <br>
       <div id="categories-container">
         <!-- Dynamic category fields will be added here -->
       </div>
@@ -59,8 +69,6 @@
         const categoryField = document.createElement('div');
         categoryField.innerHTML = `
           <h3>Category ${categoryId + 1}</h3>
-          <label for="name-${categoryId}">Number of image to generate </label>
-          <input type="text" id="name-${categoryId}" onChange="${onChangeNumOfImage(categoryId)}" required>
           <br>
           <label for="name-${categoryId}">Category Name:</label>
           <input type="text" id="name-${categoryId}" name="category[${categoryId}][categoryName]" required>
@@ -72,7 +80,7 @@
           <div id="files-container-${categoryId}" >
             <br>
           <label for="file-${categoryId}">File:</label>
-          <input type="file" multiple id="file-${categoryId}" accept="image/*" onchange="onChangeFile(${categoryId})" required>
+          <input type="file" multiple id="file-${categoryId}" accept="image/*" onchange="onChangeFile(${categoryId})" name="category[${categoryId}][file]" required>
           
             <!-- Dynamic file fields will be added here -->
           </div>
@@ -89,6 +97,16 @@
         categoriesContainer.appendChild(categoryField);
         categoryId++;
       }
+
+function onClick(option){
+const blockChain = document.getElementById("blockchain")
+const blockChains = document.getElementById("blchain")
+const val = document.getElementById("blockchain").value
+// blockChain.name = "blockchain"
+blockChains.value = option
+
+}
+
       function addFile(categoryId) {
         const filesContainer = document.getElementById(`files-container-${categoryId}`);
 
@@ -96,10 +114,10 @@
         fileField.innerHTML = `
         <br>
           <label for="file-${categoryId}-${filesContainer.childElementCount}">File:</label>
-          <input type="file" multiple id="file-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" accept="image/*" onchange="onChangeFile(${categoryId},${filesContainer.childElementCount})" required>
+          <input type="file" multiple id="file-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][image][${filesContainer.childElementCount}]" accept="image/*" onchange="onChangeFile(${categoryId},${filesContainer.childElementCount})" required>
           <br>
             <label for="image-${categoryId}-${filesContainer.childElementCount}">Probabilty:</label>
-          <input type="number" id="image-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][probability][${filesContainer.childElementCount}]" >
+          <input type="number" id="image-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][probability][${filesContainer.childElementCount}]" >
           <br>
         `;
 
@@ -154,17 +172,17 @@
             const filesContainer = document.getElementById(`Images-container-${categoryId}`);
             const fileField = document.createElement('div');
             fileField.innerHTML = `
-            <img src="${e.target.result}" alt="Smiley face" width="60" height="60" style="vertical-align:middle;margin:0px 50px" name="categories[${categoryId}][image][${filesContainer.childElementCount}]" onclick="onClickImage(${categoryId},${filesContainer.childElementCount},${files.length})">
+            <img src="${e.target.result}" alt="Smiley face" value="${e.target.result}" width="60" height="60" style="vertical-align:middle;margin:0px 50px" name="category[${categoryId}][file][${filesContainer.childElementCount}][image]" onclick="onClickImage(${categoryId},${filesContainer.childElementCount},${files.length})">
             <br>
                 <label for="image-${categoryId}-${filesContainer.childElementCount}">Probabilty:</label>
-                <input type="text" id="probability-${categoryId}-${filesContainer.childElementCount}" name="categories[${categoryId}][probability][${filesContainer.childElementCount}]" value="${(100/files.length).toFixed(2)}%" onchange="onChangeProbability(${categoryId},${filesContainer.childElementCount})" >
+                <input type="text" id="probability-${categoryId}-${filesContainer.childElementCount}" name="category[${categoryId}][file][${filesContainer.childElementCount}][probability]" value="${(100/files.length).toFixed(2)}%" onchange="onChangeProbability(${categoryId},${filesContainer.childElementCount})" >
                 <div id="category[${categoryId}][attribute][${filesContainer.childElementCount}]" style="display:${filesContainer.childElementCount == 0 ? 'block':'none'}"> 
                <br>
                 <label for="name-${categoryId}">Name:</label>
-                <input type="text" id="category[${categoryId}][name][${filesContainer.childElementCount}]" name="category[${categoryId}][name][${filesContainer.childElementCount}]" required>
+                <input type="text" id="category[${categoryId}][name][${filesContainer.childElementCount}]" name="category[${categoryId}][file][${filesContainer.childElementCount}][name]" required>
                 <br>
                 <label for="category[${categoryId}][rarity][${filesContainer.childElementCount}]">Rarity:</label>
-                <input type="text" id="category[${categoryId}][rarity][${filesContainer.childElementCount}]" name="category[${categoryId}][rarity][${filesContainer.childElementCount}]" value="${(100/files.length).toFixed(2)}%"  default=${true} required>
+                <input type="text" id="category[${categoryId}][rarity][${filesContainer.childElementCount}]" name="category[${categoryId}][file][${filesContainer.childElementCount}][rarity]" value="${(100/files.length).toFixed(2)}%"  default=${true} required>
                 <br>
                 <br>
                 <div id="attribute-container-${categoryId}-${filesContainer.childElementCount}">
@@ -222,7 +240,9 @@ function onClickImage(categoryId,imageId,length){
 
       }
 
-      function submitForm() {
+      function submitForm(e) {
+        e.preventDefault()
+        debugger
         const form = document.getElementById('submit-form');
         const loader = document.getElementById('loader');
 

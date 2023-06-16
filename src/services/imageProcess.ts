@@ -5,6 +5,7 @@ import sharp from 'sharp';
 
 const Rembg = require("rembg-node").Rembg;
 const fs = require("fs")
+const path = require('path');
 
 
 
@@ -34,13 +35,14 @@ export const uploadToPinata = (data) => {
 }
 
 
-export const combineImages = async (images: Buffer[]): Promise<string> => {
-    console.log("🚀 ~ file: imageProcess.ts:38 ~ combineImages ~ images:", images)
-    let imageWidth: number = 800;
-    let imageHeight: number = 600;
+export const combineImages = async (images: Buffer[], outputPath: String): Promise<string> => {
+    let imageWidth: number = 500;
+    // let imageHeight: number = Math.ceil(500 / images.length);
+    let imageHeight: number = 400
     let imageMeasurements = await Promise.all(
         images.map(async (item) => {
             try {
+                // const image = await sharp(item, { width: 500, height: 150 });
                 const image = await sharp(item);
                 const metadata = await image.metadata();
                 let imageBuffer = await image.resize(imageWidth, imageHeight).toBuffer() // .resize(600, 400) .toBuffer();
@@ -66,7 +68,6 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
                 .flatten({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
                 .toFile("outputImagePath.png");
 
-            console.log('Background removed successfully.');
 
             // const rembg = new Rembg({
             //     logging: true,
@@ -80,17 +81,16 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
                 top: i * imageHeight + 50,
                 left: 100
             });
-            console.log("🚀 ~ file: imageProcess.ts:81 ~ imageMeasurements.map ~ compositeArray:", compositeArray)
         })
     );
 
-    console.log("🚀 ~ file: imageProcess.ts:59 ~ combineImages ~ compositeArray:", compositeArray)
 
     const compositeBuffer = await sharp({
         create: {
             width: imageWidth + 200,
             // height: imageMeasurements.reduce((sum, item) => sum + item?.height, 0) + 20 * images.length,
             height: imageHeight * images.length + 50 * images.length,
+            // height: 500,
             channels: 4,
             background: { r: 0, g: 0, b: 0, alpha: 0 }
         }
@@ -98,12 +98,10 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
         .composite(compositeArray)
         .jpeg()
         .toBuffer();
-    console.log("🚀 ~ file: imageProcess.ts:109 ~ combineImages ~ compositeArray:", compositeArray)
 
     return await new Promise<string>((resolve, reject) => {
-        fs.writeFile("output.jpeg", compositeBuffer, (error) => {
+        fs.writeFile(outputPath, compositeBuffer, (error) => {
             if (error) {
-                console.log("🚀 ~ file: imageProcess.ts:103 ~ fs.writeFile ~ error:", error)
                 reject(error);
             } else {
                 resolve("output.webp");
@@ -111,3 +109,44 @@ export const combineImages = async (images: Buffer[]): Promise<string> => {
         });
     });
 };
+
+
+export const removeBackground = (formData, outputPath) => {
+    // const inputPath = '/path/to/file.jpg';
+
+
+
+    // axios({
+    //     method: 'post',
+    //     url: process.env.BGREMOVE_API_URL,
+    //     data: formData,
+    //     responseType: 'arraybuffer',
+    //     headers: {
+    //         ...formData.getHeaders(),
+    //         'X-Api-Key': process.env.BGREMOVE_API_KEY
+    //     },
+    //     encoding: null
+    // })
+
+    let config = {
+        method: 'post',
+        url: process.env.BGREMOVE_API_URL,
+        data: formData,
+        responseType: 'arraybuffer',
+        headers: {
+            'X-Api-Key': process.env.BGREMOVE_API_KEY,
+            ...formData.getHeaders(),
+        },
+        encoding: null
+    };
+
+    return axios.request(config)
+        .then((response) => {
+            if (response.status != 200) return console.error('Error:', response.status, response.statusText);
+            fs.writeFileSync(outputPath, response.data);
+            return response.data
+        })
+        .catch((error) => {
+            return console.error('Request failed:', error);
+        });
+}
