@@ -4,7 +4,7 @@ import app from "./app";
 
 // Bootstrap application
 async function bootstrap() {
-  const port = parseInt(process.env.PORT || "4000");
+  const port = parseInt(process.env.PORT || "5000");
 
   const server = app.listen(port, () =>
     console.log(`################################################
