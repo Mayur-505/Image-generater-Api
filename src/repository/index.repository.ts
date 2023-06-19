@@ -494,12 +494,10 @@ export class Repository {
             }
             // let newArray = [...modifiedData]
             let modifiedData = await modifyCategoryData(files, category || [])
-            console.log("🚀 ~ file: index.repository.ts:497 ~ Repository ~ imageGenerate= ~ modifiedData:", modifiedData)
             let i = 0;
             let inputsArray = []
             const sortedByOrder = modifiedData.sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
             let changedData = await imageCombination(sortedByOrder, noOfImage)
-            console.log("🚀 ~ file: index.repository.ts:502 ~ Repository ~ imageGenerate= ~ changedData:", changedData, changedData?.length)
             for (let i = 0; i < noOfImage; i++) {
                 // let { inputs, secondArray } = await imageProbability(modifiedData);
                 // let { inputs } = await imageProbability(modifiedData);
@@ -509,7 +507,6 @@ export class Repository {
 
             const results = await Promise.all(changedData.map(async (inputs, index) => {
                 if (index < noOfImage) {
-                    console.log("🚀 ~ file: index.repository.ts:510 ~ Repository ~ results ~ inputs:", inputs)
                     let inputPath = `output${index}.jpeg`;
                     await combineImages(inputs?.files, inputPath);
                     const formData = new FormData();
@@ -527,7 +524,6 @@ export class Repository {
                     // data.append('file', removedBgImage);
 
                     const response = await uploadToPinata(data);
-                    console.log("🚀 ~ file: index.repository.ts:530 ~ Repository ~ results ~ response:", response)
 
                     // fs.unlink('output.jpeg', err => {
                     //     if (err) {

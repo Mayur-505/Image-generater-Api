@@ -36,9 +36,9 @@ export const uploadToPinata = (data) => {
 
 
 export const combineImages = async (images: Buffer[], outputPath: String): Promise<string> => {
-    let imageWidth: number = 1000;
+    let imageWidth: number = 200;
     // let imageHeight: number = Math.ceil(500 / images.length);
-    let imageHeight: number = 500
+    let imageHeight: number = 150
     let imageMeasurements = await Promise.all(
         images.map(async (item) => {
             try {
@@ -79,7 +79,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
                 input: element?.buffer,
                 gravity: 'north',
                 top: i * imageHeight,
-                left: 100
+                left: 10
             });
         })
     );
@@ -87,9 +87,9 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
 
     const compositeBuffer = await sharp({
         create: {
-            width: imageWidth + 200,
+            width: imageWidth + 20,
             // height: imageMeasurements.reduce((sum, item) => sum + item?.height, 0) + 20 * images.length,
-            height: imageHeight * images.length + 50 * images.length,
+            height: imageHeight * images.length,
             // height: 500,
             channels: 4,
             background: { r: 0, g: 0, b: 0, alpha: 0 }
@@ -147,6 +147,6 @@ export const removeBackground = (formData, outputPath) => {
             return response.data
         })
         .catch((error) => {
-            return console.error('Request failed:', error);
+            throw error
         });
 }
