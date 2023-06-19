@@ -47,8 +47,10 @@ export class Controller {
 
     // Controller for checking owner of nft
     public static imageGenerate = async (req: Request, res: Response) => {
+        console.log("🚀 ~ file: index.controller.ts:52 ~ Controller ~ imageGenerate= ~ req.body:", req.body)
         try {
             const results = await Repository.imageGenerate(req.body, req?.files);
+            console.log("🚀 ~ file: index.controller.ts:53 ~ Controller ~ imageGenerate= ~ results:", results)
             // let results = [{
             //     image_url: "https://gateway.pinata.cloud/ipfs/QmZt4PZyCaqyLfcKhziQGsm6nYJUcFY4kh8C3yrj9c5F9t"
             // }]

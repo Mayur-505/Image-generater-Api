@@ -36,9 +36,9 @@ export const uploadToPinata = (data) => {
 
 
 export const combineImages = async (images: Buffer[], outputPath: String): Promise<string> => {
-    let imageWidth: number = 500;
+    let imageWidth: number = 1000;
     // let imageHeight: number = Math.ceil(500 / images.length);
-    let imageHeight: number = 400
+    let imageHeight: number = 500
     let imageMeasurements = await Promise.all(
         images.map(async (item) => {
             try {
@@ -62,11 +62,11 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
         imageMeasurements.map(async (element, i) => {
             // let imageBuffer = await sharp(element?.buffer)
             //     .resize(imageWidth, imageHeight)
-            //     .toBuffer();
-            let input = sharp(element?.buffer)
-            const image = await sharp(element?.buffer)
-                .flatten({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
-                .toFile("outputImagePath.png");
+            // //     .toBuffer();
+            // let input = sharp(element?.buffer)
+            // const image = await sharp(element?.buffer)
+            //     .flatten({ background: { r: 0, g: 0, b: 0, alpha: 0 } })
+            //     .toFile("outputImagePath.png");
 
 
             // const rembg = new Rembg({
@@ -78,7 +78,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
             compositeArray.push({
                 input: element?.buffer,
                 gravity: 'north',
-                top: i * imageHeight + 50,
+                top: i * imageHeight,
                 left: 100
             });
         })

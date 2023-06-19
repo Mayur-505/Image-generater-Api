@@ -39,7 +39,8 @@
     <% results.forEach((item,index) => { %>
         <div class="image-container">
           <div class="loader"></div>
-          <!-- <p>Blockchain : <%=item.blockchain %> </p> -->
+          <p>Blockchain : <%=item.blockchain %> </p>
+          <p>Image <%=index+1%></p>
           <img src="<%= item.image_url %>"  onload="this.parentNode.querySelector('.loader').style.display='none'">
           <!-- <img src="https://gateway.pinata.cloud/ipfs/QmZt4PZyCaqyLfcKhziQGsm6nYJUcFY4kh8C3yrj9c5F9t"  onload="this.parentNode.querySelector('.loader').style.display='none'"> -->
         </div>

@@ -603,43 +603,88 @@ export const modifyCategoryData = async (fileData, category) => {
 
 export const imageProbability = async (category) => {
   let secondArray = [...category]
+  let inputs = await Promise.all(secondArray.map((items, index) => {
+
+    if (items?.userProbability) {
+      let fileLength = 0;
+      let probabilities;
+      // if (items?.file?.length > 1) {
+
+      const totalProbability = items?.file?.reduce((total, item, index) => {
+        if (item?.probability) {
+          fileLength++
+          return total + parseFloat(item?.probability)
+        } else {
+          return total
+        }
+      }, 0)
+      probabilities = items?.file?.map((file) => parseFloat(file.probability ?? (100 - totalProbability) / (fileLength || items?.file?.length))) || [];
+      // }
+      //  else {
+      //   probabilities = [parseFloat(items?.file[0]?.probability || items?.file?.probability)]
+      //   console.log("🚀 ~ file: abi.ts:624 ~ inputs:awaitcategory.map ~ items?.file[0]?.probability:", items?.file[0]?.probability, items.file?.probability)
+      // }
+      const maxProbabilityIndex = probabilities.indexOf(Math.max(...probabilities));
+      // if (items?.file?.length > 1) {
+      let newFiles = items?.file?.filter(file => parseFloat(file?.probability) !== Math.max(...probabilities))
+      // secondArray[index] = { ...secondArray[index], file: newFiles }
+      // console.log("🚀 ~ file: abi.ts:631 ~ inputs:awaitcategory.map ~ secondArray[index]:", secondArray[index], secondArray[index].file)
+
+      // }
+      items.file = items.file?.[maxProbabilityIndex];
+      return {
+        ...items,
+        file: items?.file[maxProbabilityIndex],
+      };
+    } else {
+      const randomIndex = Math.floor(Math.random() * (items.file?.length || 0));
+      items.file = items.file[randomIndex];
+
+      // secondArray[index] = { ...secondArray[index], file: items?.file }
+      // console.log("🚀 ~ file: abi.ts:656 ~ inputs ~ category[index]?.file[randomIndex]:", category[index]?.file[randomIndex], category[index].file)
+
+      return {
+        ...category[index],
+        file: items.file,
+      };
+    }
+  }))
+
   return ({
-    inputs: await category.map((items, index) => {
-
-      if (!items?.userProbability) {
-        let fileLength = 0;
-        let probabilities;
-        // if (items?.file?.length > 1) {
-
-        const totalProbability = items?.file?.reduce((total, item, index) => {
-          if (item?.probability) {
-            fileLength++
-            return total + parseFloat(item?.probability)
-          } else {
-            return total
-          }
-        }, 0)
-        probabilities = items?.file?.map((file) => parseFloat(file.probability ?? (100 - totalProbability) / (fileLength || items?.file?.length))) || [];
-        // }
-        //  else {
-        //   probabilities = [parseFloat(items?.file[0]?.probability || items?.file?.probability)]
-        //   console.log("🚀 ~ file: abi.ts:624 ~ inputs:awaitcategory.map ~ items?.file[0]?.probability:", items?.file[0]?.probability, items.file?.probability)
-        // }
-        const maxProbabilityIndex = probabilities.indexOf(Math.max(...probabilities));
-        // if (items?.file?.length > 1) {
-        let newFiles = items?.file?.filter(file => parseFloat(file?.probability) !== Math.max(...probabilities))
-        secondArray[index] = { ...secondArray[index], file: newFiles }
-        // console.log("🚀 ~ file: abi.ts:631 ~ inputs:awaitcategory.map ~ secondArray[index]:", secondArray[index], secondArray[index].file)
-
-        // }
-        items.file = items.file?.[maxProbabilityIndex];
-        return items;
-      } else {
-        const randomIndex = Math.floor(Math.random() * (items.file?.length || 0));
-        items.file = items.file?.[randomIndex];
-        return items;
-      }
-    })
-    , secondArray
+    inputs
+    // , secondArray
   })
+}
+
+
+export const imageCombination = async (data, totalImage) => {
+  let allFiles = []
+  await Promise.all(data?.map(item => {
+    allFiles.push(item?.file)
+  }))
+
+  let result = generateCombinations(allFiles);
+  return result.sort((a, b) => b?.totalProbability - a?.totalProbability);
+
+}
+
+
+function generateCombinations(array, index = 0, currentCombination = [], allCombinations = []) {
+  if (index === array.length) {
+    allCombinations.push({ files: currentCombination?.map(item => item?.image), totalProbability: currentCombination?.reduce((total, data) => total + parseFloat(data?.probability), 0) });
+    return allCombinations;
+  }
+
+  const subarray = array[index];
+  const subarrayLength = subarray.length;
+
+  for (let i = 0; i < subarrayLength; i++) {
+    const image = subarray[i];
+    if (!currentCombination.includes(image)) {
+      const newCombination = [...currentCombination, image];
+      generateCombinations(array, index + 1, newCombination, allCombinations);
+    }
+  }
+
+  return allCombinations;
 }

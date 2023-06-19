@@ -84,6 +84,8 @@
           
             <!-- Dynamic file fields will be added here -->
           </div>
+          <input id="user-probability-${categoryId}" name="category[${categoryId}][userProbability]" style="display:none"/>
+
           <div id="Images-container-${categoryId}" style="display:flex">
             
             <!-- Dynamic file fields will be added here -->
@@ -224,6 +226,8 @@ function onClickImage(categoryId,imageId,length){
   }
 }
       function onChangeProbability(categoryId,imageId){
+        let container = document.getElementById(`user-probability-${categoryId}`)
+        container.value = true
         const imageContainer = document.getElementById(`Images-container-${categoryId}`);
 
         const currentProbability = parseFloat(document.getElementById(`probability-${categoryId}-${imageId}`).value.replace("%",""))

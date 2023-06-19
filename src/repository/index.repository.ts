@@ -1,6 +1,6 @@
 import Web3 from "web3";
 import { singleNFTPayload, singleNFTResult, BlockchainType, multiNFTPayload, multiNFTResult, transferNFTPayload, transferNFTResult, ownerOfNFTPayload, ownerOfNFTResult, imageGenerateResult } from "../interfaces";
-import { contract_ABI, imageProbability, modifyCategoryData } from "../utils/abi";
+import { contract_ABI, imageCombination, imageProbability, modifyCategoryData } from "../utils/abi";
 import { combineImages, removeBackground, uploadToPinata } from "../services/imageProcess";
 import { userValidation } from "../validation";
 const fs = require("fs");
@@ -485,7 +485,6 @@ export class Repository {
         try {
             let isOwner = false;
             let result: any = []
-            let modifiedData = await modifyCategoryData(files, category || [])
             const { error, value } = userValidation.imageGenerate.validate(data);
 
             if (error) {
@@ -494,44 +493,81 @@ export class Repository {
                 //   res.status(400).json({ error: error.details });
             }
             // let newArray = [...modifiedData]
+            let modifiedData = await modifyCategoryData(files, category || [])
+            console.log("🚀 ~ file: index.repository.ts:497 ~ Repository ~ imageGenerate= ~ modifiedData:", modifiedData)
             let i = 0;
             let inputsArray = []
+            const sortedByOrder = modifiedData.sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
+            let changedData = await imageCombination(sortedByOrder, noOfImage)
+            console.log("🚀 ~ file: index.repository.ts:502 ~ Repository ~ imageGenerate= ~ changedData:", changedData, changedData?.length)
             for (let i = 0; i < noOfImage; i++) {
-                const { inputs, secondArray } = await imageProbability(modifiedData);
-                const modifiedInputs = { ...inputs[0], file: inputs[0].file };
-                inputsArray.push(inputs.map((item, index) => ({ ...item, file: inputs[index].file })));
-                modifiedData = secondArray;
+                // let { inputs, secondArray } = await imageProbability(modifiedData);
+                // let { inputs } = await imageProbability(modifiedData);
+                // inputsArray.push(inputs.map((item, index) => ({ ...item, file: inputs[index].file })));
+                // newArray = secondArray;
             }
 
-            const results = await Promise.all(inputsArray.map(async (inputs, index) => {
-                const sortedByOrder = [...inputs].sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
-                const images = sortedByOrder.map(item => item?.file?.image || "");
-                let inputPath = `output${index}.jpeg`;
-                await combineImages(images?.filter(item => item), inputPath);
-                const formData = new FormData();
-                formData.append('size', 'auto');
-                formData.append('image_file', fs.createReadStream(inputPath), path.basename(inputPath));
-                let removedBgImage = await removeBackground(formData, inputPath)
-                const metadata = sortedByOrder[0];
-                delete metadata["file"];
-                metadata["name"] = metadata?.categoryName;
-                metadata["blockchain"] = blockchain;
+            const results = await Promise.all(changedData.map(async (inputs, index) => {
+                if (index < noOfImage) {
+                    console.log("🚀 ~ file: index.repository.ts:510 ~ Repository ~ results ~ inputs:", inputs)
+                    let inputPath = `output${index}.jpeg`;
+                    await combineImages(inputs?.files, inputPath);
+                    const formData = new FormData();
+                    formData.append('size', 'auto');
+                    formData.append('image_file', fs.createReadStream(inputPath), path.basename(inputPath));
+                    let removedBgImage = await removeBackground(formData, inputPath)
+                    const metadata = sortedByOrder[0];
+                    delete metadata["file"];
+                    metadata["name"] = metadata?.categoryName;
+                    metadata["blockchain"] = blockchain;
 
-                const data = new FormData();
-                data.append('pinataMetadata', JSON.stringify(metadata));
-                data.append('file', fs.createReadStream(`output${index}.jpeg`));
-                // data.append('file', removedBgImage);
+                    const data = new FormData();
+                    data.append('pinataMetadata', JSON.stringify(metadata));
+                    data.append('file', fs.createReadStream(`output${index}.jpeg`));
+                    // data.append('file', removedBgImage);
 
-                const response = await uploadToPinata(data);
+                    const response = await uploadToPinata(data);
+                    console.log("🚀 ~ file: index.repository.ts:530 ~ Repository ~ results ~ response:", response)
 
-                // fs.unlink('output.jpeg', err => {
-                //     if (err) {
-                //         console.log("Error unlinking file:", err);
-                //     }
-                // });
+                    // fs.unlink('output.jpeg', err => {
+                    //     if (err) {
+                    //         console.log("Error unlinking file:", err);
+                    //     }
+                    // });
 
-                return { image_url: `https://gateway.pinata.cloud/ipfs/${response?.IpfsHash}`, uid: response?.IpfsHash, blockchain };
+                    return { image_url: `https://gateway.pinata.cloud/ipfs/${response?.IpfsHash}`, uid: response?.IpfsHash, blockchain };
+
+                }
             }));
+            // const results = await Promise.all(inputsArray.map(async (inputs, index) => {
+            //     const sortedByOrder = [...inputs].sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
+            //     const images = sortedByOrder.map(item => item?.file?.image || "");
+            //     let inputPath = `output${index}.jpeg`;
+            //     await combineImages(images?.filter(item => item), inputPath);
+            //     const formData = new FormData();
+            //     formData.append('size', 'auto');
+            //     formData.append('image_file', fs.createReadStream(inputPath), path.basename(inputPath));
+            //     let removedBgImage = await removeBackground(formData, inputPath)
+            //     const metadata = sortedByOrder[0];
+            //     delete metadata["file"];
+            //     metadata["name"] = metadata?.categoryName;
+            //     metadata["blockchain"] = blockchain;
+
+            //     const data = new FormData();
+            //     data.append('pinataMetadata', JSON.stringify(metadata));
+            //     data.append('file', fs.createReadStream(`output${index}.jpeg`));
+            //     // data.append('file', removedBgImage);
+
+            //     const response = await uploadToPinata(data);
+
+            //     // fs.unlink('output.jpeg', err => {
+            //     //     if (err) {
+            //     //         console.log("Error unlinking file:", err);
+            //     //     }
+            //     // });
+
+            //     return { image_url: `https://gateway.pinata.cloud/ipfs/${response?.IpfsHash}`, uid: response?.IpfsHash, blockchain };
+            // }));
             // while (i < noOfImage) {
             //     console.log("🚀 ~ file: index.repository.ts:499 ~ Repository ~ imageGenerate= ~ newArray:", newArray)
             //     const { inputs, secondArray } = await imageProbability(newArray)
@@ -559,9 +595,9 @@ export class Repository {
 
             // }
 
-            return results;
+            return results.filter(item => item);
         } catch (err) {
-            // console.log("🚀 ~ file: index.repository.ts:517 ~ Repository ~ imageGenerate= ~ err:", err)
+            console.log("🚀 ~ file: index.repository.ts:517 ~ Repository ~ imageGenerate= ~ err:", err)
             throw err;
         }
     }
