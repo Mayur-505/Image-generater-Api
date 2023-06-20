@@ -2,6 +2,8 @@ import express from "express";
 import { Controller } from "../controller/index.controller";
 import { validate } from "express-validation";
 import { userValidation } from "../validation";
+import { removeBackgrounds } from "../services/imageProcess";
+// import { cutImageBackground } from "../services/imageProcess";
 const router = express.Router();
 const multer = require('multer');
 const fs = require('fs');
@@ -69,9 +71,88 @@ const upload = multer();
 //         res.status(500).send('An error occurred while removing the background.');
 //     }
 // });
+const { createCanvas, loadImage } = require('canvas');
+
+router.get('/remove-background', async (req, res) => {
+    // Get the base64-encoded image data from the request body
+    // const { imageData } = req.body;
+
+    // Create a new buffer from the base64-encoded image data
+    // const imageBuffer = Buffer.from(imageData, 'base64');
+
+    // try {
+    //     // Load the image using `sharp`
+    //     const image = sharp("ORANGE1.jpeg");
+
+    //     // Extract the alpha channel of the image
+    //     const alphaImage = await image.ensureAlpha().toBuffer();
+
+    //     // Create a new canvas with the same dimensions as the image
+    //     const canvas = createCanvas(image.width, image.height);
+    //     const context = canvas.getContext('2d');
+
+    //     // Load the alpha image onto the canvas
+    //     const img = await loadImage(alphaImage);
+    //     context.drawImage(img, 0, 0);
+
+    //     // Set the background color to transparent
+    //     context.globalCompositeOperation = 'destination-out';
+    //     context.fillStyle = 'rgba(0, 0, 0, 0)';
+    //     context.fillRect(0, 0, image.width, image.height);
+
+    //     // Convert the modified canvas back to a buffer
+    //     const resultBuffer = canvas.toBuffer("image/png");
+
+    //     // Send the modified image buffer as a response
+    //     // res.set('Content-Type', 'image/png');
+    //     fs.writeFileSync("outputPath.png", resultBuffer);
+    //     // res.send(resultBuffer);
+
+    // } catch (error) {
+    //     console.error(error);
+    //     res.status(500).send('An error occurred during image processing');
+    // }
+    // try {
+    //     // const imagePath = './public/your-image.jpg'; // Update the path to your image file
+
+    //     // Load the image using 'node-canvas'
+    //     const image = await loadImage("ORANGE1.jpeg");
+
+    //     // Create a canvas with the same dimensions as the image
+    //     const canvas = createCanvas(image.width, image.height);
+    //     const ctx = canvas.getContext('2d');
+
+    //     // Draw the image on the canvas
+    //     ctx.drawImage(image, 0, 0, image.width, image.height);
+
+    //     // Apply any background removal logic here
+    //     // You can use various image processing techniques or libraries for this step
+
+    //     // Example: Set the background to transparent using the 'ctx.globalCompositeOperation' property
+    //     ctx.globalCompositeOperation = 'destination-out';
+    //     ctx.fillRect(0, 0, image.width, image.height);
+    //     const buffer = canvas.toBuffer("image/png");
+    //     fs.writeFileSync("./image.png", buffer);
+    //     // Convert the modified canvas to a base64-encoded PNG image
+    //     const modifiedImage = canvas.toDataURL('image/png');
+
+    //     res.send(`<img src="${modifiedImage}" alt="Modified Image" />`);
+    // } catch (error) {
+    //     console.error('An error occurred:', error);
+    //     res.status(500).send('An error occurred');
+    // }
+    // removeBackgrounds()
+    //     .then(() => {
+    //         console.log('Background removed successfully.');
+    //     })
+    //     .catch((error) => {
+    //         console.error('An error occurred:', error);
+    //     });
+});
 
 
 router.get("/", (req, res) => {
+    // cutImageBackground("strwaberry2.jpeg", "cut.png")
     res.send("hello worlds")
 });
 

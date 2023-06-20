@@ -507,7 +507,7 @@ export class Repository {
 
             const results = await Promise.all(changedData.map(async (inputs, index) => {
                 if (index < noOfImage) {
-                    let inputPath = `output${index}.jpeg`;
+                    let inputPath = `output${index}.png`;
                     await combineImages(inputs?.files, inputPath);
                     const formData = new FormData();
                     formData.append('size', 'auto');
@@ -520,7 +520,7 @@ export class Repository {
 
                     const data = new FormData();
                     data.append('pinataMetadata', JSON.stringify(metadata));
-                    data.append('file', fs.createReadStream(`output${index}.jpeg`));
+                    data.append('file', fs.createReadStream(inputPath));
                     // data.append('file', removedBgImage);
 
                     const response = await uploadToPinata(data);
@@ -593,7 +593,6 @@ export class Repository {
 
             return results.filter(item => item);
         } catch (err) {
-            console.log("🚀 ~ file: index.repository.ts:517 ~ Repository ~ imageGenerate= ~ err:", err)
             throw err;
         }
     }
