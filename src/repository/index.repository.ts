@@ -5,8 +5,8 @@ import { combineImages, removeBackground, uploadToPinata } from "../services/ima
 import { userValidation } from "../validation";
 const fs = require("fs");
 const FormData = require('form-data');
+const Color = require('color');
 const path = require('path');
-
 export class Repository {
     constructor() { }
 
@@ -481,7 +481,8 @@ export class Repository {
     }
 
     public static imageGenerate = async (data: any, files: any): Promise<imageGenerateResult[]> => {
-        let { category, noOfImage, blockchain } = data
+        let { category, noOfImage, blockchain, apiKey, bgColor } = data
+        const color = Color(bgColor || "#ffffff")
         try {
             let isOwner = false;
             let result: any = []
@@ -492,27 +493,43 @@ export class Repository {
                 throw error?.details
                 //   res.status(400).json({ error: error.details });
             }
+            // await Promise.all(files?.map((item, index) => {
+            //     fs.writeFileSync(`bgremove${item?.fieldname}${index}.png`, item?.buffer);
+
+            // }))
             // let newArray = [...modifiedData]
-            let modifiedData = await modifyCategoryData(files, category || [])
+            let backgroundFile = files?.find(item => item?.fieldname === "bgFile")
+            if (backgroundFile) {
+
+                fs.writeFileSync("background.png", backgroundFile?.buffer)
+            }
+            let modifiedData = await modifyCategoryData(files?.filter(item => item?.fieldname !== "bgFile"), category || [], apiKey)
             let i = 0;
             let inputsArray = []
             const sortedByOrder = modifiedData.sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
-            let changedData = await imageCombination(sortedByOrder, noOfImage)
-            for (let i = 0; i < noOfImage; i++) {
-                // let { inputs, secondArray } = await imageProbability(modifiedData);
-                // let { inputs } = await imageProbability(modifiedData);
-                // inputsArray.push(inputs.map((item, index) => ({ ...item, file: inputs[index].file })));
-                // newArray = secondArray;
-            }
+            let changedData = await imageCombination(sortedByOrder, noOfImage, apiKey)
+            // for (let i = 0; i < noOfImage; i++) {
+            //     // let { inputs, secondArray } = await imageProbability(modifiedData);
+            //     // let { inputs } = await imageProbability(modifiedData);
+            //     // inputsArray.push(inputs.map((item, index) => ({ ...item, file: inputs[index].file })));
+            //     // newArray = secondArray;
+            // }
 
             const results = await Promise.all(changedData.map(async (inputs, index) => {
                 if (index < noOfImage) {
                     let inputPath = `output${index}.png`;
-                    await combineImages(inputs?.files, inputPath);
-                    const formData = new FormData();
-                    formData.append('size', 'auto');
-                    formData.append('image_file', fs.createReadStream(inputPath), path.basename(inputPath));
-                    let removedBgImage = await removeBackground(formData, inputPath)
+                    await combineImages(inputs?.files, inputPath, color.object());
+                    if (backgroundFile) {
+                        const formData = new FormData();
+                        formData.append('size', 'auto');
+                        // formData.append('bg_color', bgColor);
+                        // formData.append('bg_image_file ', bgColor);
+                        formData.append('image_file', fs.createReadStream(inputPath), path.basename(inputPath));
+                        formData.append('bg_image_file', fs.readFileSync("background.png"), "background.png");
+                        // formData.append('bg_image_url', "https://amymhaddad.s3.amazonaws.com/morocco-blue.png");
+                        let removedBgImage = await removeBackground(formData, inputPath, apiKey)
+
+                    }
                     const metadata = sortedByOrder[0];
                     delete metadata["file"];
                     metadata["name"] = metadata?.categoryName;
@@ -524,17 +541,24 @@ export class Repository {
                     // data.append('file', removedBgImage);
 
                     const response = await uploadToPinata(data);
-
-                    // fs.unlink('output.jpeg', err => {
-                    //     if (err) {
-                    //         console.log("Error unlinking file:", err);
-                    //     }
-                    // });
+                    fs.unlink(inputPath, err => {
+                        if (err) {
+                            console.log("Error unlinking file:", err);
+                        }
+                    });
 
                     return { image_url: `https://gateway.pinata.cloud/ipfs/${response?.IpfsHash}`, uid: response?.IpfsHash, blockchain };
 
                 }
             }));
+            if (backgroundFile) {
+                fs.unlink('background.png', err => {
+                    if (err) {
+                        console.log("Error unlinking file:", err);
+                    }
+                });
+
+            }
             // const results = await Promise.all(inputsArray.map(async (inputs, index) => {
             //     const sortedByOrder = [...inputs].sort((a, b) => parseInt(a?.order) - parseInt(b?.order));
             //     const images = sortedByOrder.map(item => item?.file?.image || "");

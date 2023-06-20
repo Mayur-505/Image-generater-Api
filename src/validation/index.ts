@@ -4,6 +4,9 @@ export const userValidation = {
     imageGenerate: Joi.object({
         noOfImage: Joi.number().required(),
         blockchain: Joi.string().required(),
+        apiKey: Joi.string().required(),
+        bgColor: Joi.string(),
+        // bgFile: Joi.any(),
         category: Joi.array().items(
             Joi.object()
                 .keys({

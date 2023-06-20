@@ -1,3 +1,10 @@
+import { removeBackground } from "../services/imageProcess";
+
+const fs = require("fs")
+const path = require('path');
+const FormData = require('form-data');
+
+
 export const contract_ABI: any = [
   {
     "inputs": [
@@ -580,24 +587,19 @@ export const getIndex = (str: string) => {
   return [...matches].map(match => parseInt(match[1]));
 }
 
-export const modifyCategoryData = async (fileData, category) => {
+export const modifyCategoryData = async (fileData, category, apiKey) => {
   let fileIndex = 0
-  return await category.map((item, index) => {
-    item.file = item.file?.map(data => {
-      data.image = fileData[fileIndex]?.buffer
-      fileIndex++
+  return await Promise.all(category.map(async (item, index) => {
+    let files = fileData?.filter(file => file?.fieldname === `category[${index}][file]`)
+    item.file = await Promise.all(item.file?.map(async (data, i) => {
+      fs.writeFileSync(`bgremove${index}${i}.png`, files[i]?.buffer);
+
+      data.image = files[i]?.buffer
       return data
-    })
+    }))
     return item
-  })
-  fileData?.forEach(file => {
-    const fileIndex = getIndex(file?.fieldname);
-    category[fileIndex[0]] = { ...category[fileIndex[0]], file: category[fileIndex[0]]?.file || [] }
-    const currentItem = category[fileIndex[0]];
-    const files = currentItem?.file || [];
-    files[fileIndex[1]] = { image: file?.buffer, ...(files[fileIndex[1]] || {}) };
-    category[fileIndex[0]].file = files;
-  });
+  }))
+
 }
 
 
@@ -619,18 +621,9 @@ export const imageProbability = async (category) => {
         }
       }, 0)
       probabilities = items?.file?.map((file) => parseFloat(file.probability ?? (100 - totalProbability) / (fileLength || items?.file?.length))) || [];
-      // }
-      //  else {
-      //   probabilities = [parseFloat(items?.file[0]?.probability || items?.file?.probability)]
-      //   console.log("🚀 ~ file: abi.ts:624 ~ inputs:awaitcategory.map ~ items?.file[0]?.probability:", items?.file[0]?.probability, items.file?.probability)
-      // }
-      const maxProbabilityIndex = probabilities.indexOf(Math.max(...probabilities));
-      // if (items?.file?.length > 1) {
-      let newFiles = items?.file?.filter(file => parseFloat(file?.probability) !== Math.max(...probabilities))
-      // secondArray[index] = { ...secondArray[index], file: newFiles }
-      // console.log("🚀 ~ file: abi.ts:631 ~ inputs:awaitcategory.map ~ secondArray[index]:", secondArray[index], secondArray[index].file)
 
-      // }
+      const maxProbabilityIndex = probabilities.indexOf(Math.max(...probabilities));
+
       items.file = items.file?.[maxProbabilityIndex];
       return {
         ...items,
@@ -640,8 +633,6 @@ export const imageProbability = async (category) => {
       const randomIndex = Math.floor(Math.random() * (items.file?.length || 0));
       items.file = items.file[randomIndex];
 
-      // secondArray[index] = { ...secondArray[index], file: items?.file }
-      // console.log("🚀 ~ file: abi.ts:656 ~ inputs ~ category[index]?.file[randomIndex]:", category[index]?.file[randomIndex], category[index].file)
 
       return {
         ...category[index],
@@ -657,10 +648,20 @@ export const imageProbability = async (category) => {
 }
 
 
-export const imageCombination = async (data, totalImage) => {
+export const imageCombination = async (data, totalImage, apiKey) => {
   let allFiles = []
-  await Promise.all(data?.map(item => {
-    allFiles.push(item?.file)
+  await Promise.all(data?.map(async (item, index) => {
+    let files = await Promise.all(item.file?.map(async (data, i) => {
+      const formData = new FormData();
+      formData.append('size', 'auto');
+      formData.append('image_file', fs.createReadStream(`bgremove${index}${i}.png`), path.basename(`bgremove${index}${i}.png`));
+      let buffer = await removeBackground(formData, `outputPath${index}${i}.png`, apiKey)
+
+      data.image = buffer
+      return data
+    }))
+    allFiles.push(files)
+
   }))
 
   let result = generateCombinations(allFiles);

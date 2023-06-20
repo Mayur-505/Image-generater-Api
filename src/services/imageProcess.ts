@@ -37,7 +37,7 @@ export const uploadToPinata = (data) => {
 }
 
 
-export const combineImages = async (images: Buffer[], outputPath: String): Promise<string> => {
+export const combineImages = async (images: Buffer[], outputPath: String, color: any): Promise<string> => {
     const image = await sharp(images[0]);
     const metadata = await image.metadata();
     let imageWidth: number = metadata?.width;
@@ -71,7 +71,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
             // formData.append('size', 'full');
             // formData.append('image_file', fs.createReadStream(`bgremove${i}.jpeg`), path.basename(`bgremove${i}.jpeg`));
             // let removedBgImage = await removeBackground(formData, `bgremove${i}.jpeg`)
-            let buffer = await removeBackgrounds(element?.buffer)
+            // let buffer = await removeBackgrounds(element?.buffer)
 
             // console.log("🚀 ~ file: imageProcess.ts:72 ~ imageMeasurements.map ~ removedBgImage:", removedBgImage)
             // let imageBuffer = await sharp(element?.buffer)
@@ -90,7 +90,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
             // const output = await rembg.remove(input);
             // let imageRm = await output.webp().toBuffer()
             compositeArray.push({
-                input: buffer,
+                input: element?.buffer,
                 gravity: 'north',
                 // top: i > 0 ? i * imageHeight - 40 : i * imageHeight,
                 top: 0,
@@ -107,7 +107,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
             height: imageHeight,
             // height: 500,
             channels: 4,
-            background: { r: 0, g: 0, b: 0, alpha: 0 }
+            background: color
         }
     })
         .composite(compositeArray)
@@ -126,7 +126,7 @@ export const combineImages = async (images: Buffer[], outputPath: String): Promi
 };
 
 
-export const removeBackground = (formData, outputPath) => {
+export const removeBackground = (formData, outputPath, apiKey) => {
     // const inputPath = '/path/to/file.jpg';
 
 
@@ -149,7 +149,7 @@ export const removeBackground = (formData, outputPath) => {
         data: formData,
         responseType: 'arraybuffer',
         headers: {
-            'X-Api-Key': process.env.BGREMOVE_API_KEY,
+            'X-Api-Key': apiKey,
             ...formData.getHeaders(),
         },
         encoding: null
@@ -158,10 +158,10 @@ export const removeBackground = (formData, outputPath) => {
     return axios.request(config)
         .then((response) => {
             if (response.status != 200) return console.error('Error:', response.status, response.statusText);
-            fs.writeFileSync(outputPath, response.data);
             return response.data
         })
         .catch((error) => {
+            throw error
             return console.error('Request failed:', error);
         });
 }
